@@ -11,7 +11,7 @@ if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
   set(VCPKG_TARGET_TRIPLET "$ENV{VCPKG_DEFAULT_TRIPLET}" CACHE STRING "")
 endif()
 
-project(cpp-modern LANGUAGES CXX)
+project(cpp-adv LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,21 +27,10 @@ if(NOT Catch2_FOUND)
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.2.1 # or a later release
+    GIT_TAG        v3.5.1 # or a later release
   )
   FetchContent_MakeAvailable(Catch2)
 endif()
-
-########################################################################
-# Catch2
-# Include(FetchContent)
-
-# FetchContent_Declare(
-#   Catch2
-#   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-#   GIT_TAG        v3.2.1 # or a later release
-# )
-# FetchContent_MakeAvailable(Catch2)
 
 enable_testing()
 
