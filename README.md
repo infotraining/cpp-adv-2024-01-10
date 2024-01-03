@@ -7,32 +7,39 @@
 
 ## Konfiguracja środowiska
 
+Proszę wybrać jedną z poniższych opcji:
+
 ### Lokalna
 
-Przed szkoleniem należy zainstalować na swoim:
+Przed szkoleniem należy zainstalować:
 
-#### Kompilator + CMake
+#### Kompilator C++ wspierający C++17 - do wyboru:
+  * Visual Studio 2022
+    * przy instalacji należy zaznaczyć opcje:
+      * Desktop development with C++
+      * C++ CMake tools for Windows
+      * vcpkg package manager
 
-* Dowolny kompilator C++ (gcc, clang, Visual C++) wspierający C++17
-  * polecany kompilator pod Windows (https://nuwen.net/mingw.html) - instalacja polega na rozpakowaniu archiwum do katalogu C:\MinGW. Szczegółowy opis instalacji znajduje się na stronie.
-
-* [CMake > 3.15](https://cmake.org/)
-  * proszę sprawdzić wersję w linii poleceń
-
-  ```
-  cmake --version
-  ```
-
-#### Visual Studio Code
-
-* [Visual Studio Code](https://code.visualstudio.com/)
-* Zainstalować wtyczki
-  * C/C++ Extension Pack
-  * Live Share
+  * gcc-12
+    * [CMake > 3.25](https://cmake.org/)
+    * proszę sprawdzić wersję w linii poleceń        
+  
+      ```
+      cmake --version
+      ```
+      
+    * IDE: Visual Studio Code
+      * [Visual Studio Code](https://code.visualstudio.com/)
+      * Zainstalować wtyczki
+        * C/C++ Extension Pack
+        * Live Share
 
 ### Docker + Visual Studio Code
 
 Jeśli uczestnicy szkolenia korzystają w pracy z Docker'a, to należy zainstalować:
+
+#### Docker
+* https://www.docker.com/get-started/
 
 #### Visual Studio Code
 
@@ -42,4 +49,3 @@ Jeśli uczestnicy szkolenia korzystają w pracy z Docker'a, to należy zainstalo
   * Dev Containers ([wymagania](https://code.visualstudio.com/docs/devcontainers/containers#_system-requirements))
     * po instalacji wtyczki - należy otworzyć w VS Code folder zawierający sklonowane repozytorium i
       z palety poleceń (Ctrl+Shift+P) wybrać opcję **Dev Containers: Rebuild and Reopen in Container**
-
