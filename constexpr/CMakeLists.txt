@@ -12,5 +12,4 @@ file(GLOB HEADERS_LIST "*.h" "*.hpp")
 add_executable(${TARGET_MAIN} ${SRC_LIST} ${HEADERS_LIST})
 target_link_libraries(${TARGET_MAIN} PRIVATE Catch2::Catch2WithMain)
 
-add_test(NAME ${TARGET_MAIN}
-         COMMAND ${TARGET_MAIN})
+catch_discover_tests(${TARGET_MAIN})

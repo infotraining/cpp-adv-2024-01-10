@@ -9,7 +9,7 @@ using namespace std;
 TEST_CASE("Moving paragraph")
 {
     LegacyCode::Paragraph p("***");
-    LegacyCode::Paragraph mp = move(p);
+    LegacyCode::Paragraph mp = std::move(p);
 
     REQUIRE(mp.get_paragraph() == string("***"));
     REQUIRE(p.get_paragraph() == nullptr);
@@ -18,7 +18,7 @@ TEST_CASE("Moving paragraph")
 TEST_CASE("Moving text shape")
 {
     Text txt{10, 20, "text"};
-    Text mtxt = move(txt);
+    Text mtxt = std::move(txt);
 
     REQUIRE(mtxt.text() == string("text"));
     REQUIRE(txt.text() == string());

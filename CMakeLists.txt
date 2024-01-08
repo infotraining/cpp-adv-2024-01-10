@@ -30,7 +30,12 @@ if(NOT Catch2_FOUND)
     GIT_TAG        v3.5.1 # or a later release
   )
   FetchContent_MakeAvailable(Catch2)
+
+  list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 endif()
+
+include(CTest)
+include(Catch)
 
 enable_testing()
 
