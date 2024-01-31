@@ -31,6 +31,8 @@ public:
         , items_{new int[size_]}
     {
         std::copy(il.begin(), il.end(), items_);
+
+        print();
     }
 
     // copy constructor
@@ -39,6 +41,9 @@ public:
         , items_{new int[source.size()]}
     {
         std::copy(source.begin(), source.end(), items_);
+
+        std::cout << "CC: ";
+        print();
     }
 
     // copy assignment operator
@@ -56,6 +61,47 @@ public:
         Array temp(source);
         swap(temp);
 
+        std::cout << "CC op=: ";
+        print();
+
+        return *this;
+    }
+
+    // move constructor
+    Array(Array&& source) noexcept : size_{source.size_}, items_{source.items_}
+    {
+        source.size_ = 0; // extra safety
+        source.items_ = nullptr;
+
+        try
+        {
+            std::cout << "MV: ";
+            print();
+        }
+        catch(...)
+        {}
+    }
+
+    // move assignment
+    Array& operator=(Array&& source)
+    {
+        // if (this != &source)
+        // {
+        //     delete[] items_;
+            
+        //     size_ = source.size_;
+        //     items_ = source.items_;
+            
+        //     source.size_ = 0; // extra safety
+        //     source.items_ = nullptr;
+        // }
+
+        Array temp = std::move(source);
+        swap(temp);
+
+        std::cout << "MV op=: ";
+        print();
+
         return *this;
     }
 
@@ -65,7 +111,7 @@ public:
         std::swap(items_, other.items_);
     }
 
-    ~Array()
+    ~Array() noexcept
     {
         delete[] items_;
     }
@@ -134,6 +180,16 @@ public:
 private:
     size_t size_;
     int* items_;
+
+    void print() const
+    {
+        std::cout << "Array{ ";
+        for (const auto& item : *this)
+        {
+            std::cout << item << " ";
+        }
+        std::cout << "}\n";
+    }
 };
 
 void foo(int);
@@ -240,7 +296,7 @@ TEST_CASE("containers & iterators")
 
             SECTION("is interpreted as")
             {
-                auto start = vec.begin(); 
+                auto start = vec.begin();
                 auto post_end = vec.end();
 
                 for (auto it = start; it != post_end; ++it)
@@ -348,7 +404,7 @@ Array create_squares(size_t size, int start = 1)
     Array squares(size);
 
     auto it = squares.begin();
-    for(int i = start; it != squares.end(); ++it, ++i)
+    for (int i = start; it != squares.end(); ++it, ++i)
     {
         *it = i * i;
     }
@@ -358,6 +414,56 @@ Array create_squares(size_t size, int start = 1)
 
 TEST_CASE("return by value")
 {
-    Array squares = create_squares(5);
-    CHECK(squares == Array{1, 4, 9, 16, 25});
+    SECTION("return")
+    {
+        Array squares = create_squares(5);
+        CHECK(squares == Array{1, 4, 9, 16, 25});
+
+        Array backup = squares;
+    }
+
+    SECTION("push_backs")
+    {
+        Array squares = create_squares(5);
+
+        std::vector<Array> data;
+        //data.reserve(100);
+        data.push_back(squares);
+        data.push_back(Array{665, 667});
+        data.push_back(Array{1115, 5667});
+        data.push_back(Array{666, 999});
+
+        Array row = {1, 2, 3, 4, 5, 6};
+        data.push_back(std::move(row));
+
+        row = Array{0, 0, 0};
+    }
+}
+
+struct Person
+{
+    int id;
+    std::string name;
+    Array data;
+
+    Person(int id, std::string name, Array data)
+        : id{id}, name{std::move(name)}, data{std::move(data)}
+    {}
+
+    void print() const
+    {
+        std::cout << "Person: " << id << "; " << name << "; size: " << data.size() << "\n"; 
+    }
+};
+
+TEST_CASE("rule of zero")
+{
+    Person p1{42, "Jan", Array{1, 2, 3}};
+
+    //Person p2 = p1;
+    Person p3 = std::move(p1);
+
+    //p1 = p2;
+    Person p2 = std::move(p3);
+    p2 = Person(665, "LessEvil", Array{665, 667});
 }

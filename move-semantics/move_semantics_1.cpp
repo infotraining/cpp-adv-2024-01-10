@@ -14,11 +14,18 @@ TEST_CASE("reference binding")
 
     SECTION("C++98")
     {
-        // TODO
+        std::string& lref_name = name;
+        const std::string& clref_full_name = full_name(name, "Kowalski");
+        //clref_full_name[0] = 'J';
     }
 
     SECTION("C++11")
     {
-        // TODO
+        std::string&& rref_full_name = full_name(name, "Kowalski");
+        rref_full_name[0] = 'J';
+
+        CHECK(rref_full_name == "Jan Kowalski");
+
+        //std::string&& rref_name = name; // ERROR
     }
 }
