@@ -44,16 +44,25 @@ public:
     // copy assignment operator
     Array& operator=(const Array& source)
     {
-        if (this != &source)
-        {
-            size_ = source.size_;
-            delete[] items_;
-            items_ = new int[size_];
+        // if (this != &source)
+        // {
+        //     size_ = source.size_;
+        //     delete[] items_;
+        //     items_ = new int[size_];
 
-            std::copy(source.begin(), source.end(), items_);
-        }
+        //     std::copy(source.begin(), source.end(), items_);
+        // }
+
+        Array temp(source);
+        swap(temp);
 
         return *this;
+    }
+
+    void swap(Array& other)
+    {
+        std::swap(size_, other.size_);
+        std::swap(items_, other.items_);
     }
 
     ~Array()
@@ -231,7 +240,7 @@ TEST_CASE("containers & iterators")
 
             SECTION("is interpreted as")
             {
-                auto start = vec.begin();
+                auto start = vec.begin(); 
                 auto post_end = vec.end();
 
                 for (auto it = start; it != post_end; ++it)
@@ -322,5 +331,33 @@ TEST_CASE("copy")
         CHECK(data1 == data4);
 
         data1 = data1;
+
+        Array data5 = {665, 667};
+
+        SECTION("swap")
+        {
+            data1.swap(data5);
+            CHECK(data1 == Array{665, 667});
+            CHECK(data5 == Array{1, 2, 3, 4, 5, 6, 7, 8});
+        }
     }
+}
+
+Array create_squares(size_t size, int start = 1)
+{
+    Array squares(size);
+
+    auto it = squares.begin();
+    for(int i = start; it != squares.end(); ++it, ++i)
+    {
+        *it = i * i;
+    }
+
+    return squares;
+}
+
+TEST_CASE("return by value")
+{
+    Array squares = create_squares(5);
+    CHECK(squares == Array{1, 4, 9, 16, 25});
 }
