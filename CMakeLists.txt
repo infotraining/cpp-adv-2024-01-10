@@ -43,6 +43,7 @@ add_subdirectory(move-semantics)
 add_subdirectory(smart-pointers)
 add_subdirectory(templates)
 add_subdirectory(constexpr)
+add_subdirectory(intro-cpp)
 
 # Exercises
 add_subdirectory(_exercises/move-semantics-ex)
