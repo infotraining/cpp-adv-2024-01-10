@@ -3,17 +3,17 @@
 #include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
+#include <list>
 #include <memory>
 #include <string>
 #include <vector>
-#include <list>
 
 using Utils::Gadget;
 
 class Array
 {
-public:    
-    using iterator = int*; // typedef int* iterator;
+public:
+    using iterator = int*;             // typedef int* iterator;
     using const_iterator = const int*; // typedef const Pint* iterator;
 
     Array(size_t size)
@@ -26,9 +26,34 @@ public:
         std::fill_n(items_, size_, 0);
     }
 
-    Array(std::initializer_list<int> il) : size_{il.size()}, items_{new int[size_]}
+    Array(std::initializer_list<int> il)
+        : size_{il.size()}
+        , items_{new int[size_]}
     {
         std::copy(il.begin(), il.end(), items_);
+    }
+
+    // copy constructor
+    Array(const Array& source)
+        : size_{source.size()}
+        , items_{new int[source.size()]}
+    {
+        std::copy(source.begin(), source.end(), items_);
+    }
+
+    // copy assignment operator
+    Array& operator=(const Array& source)
+    {
+        if (this != &source)
+        {
+            size_ = source.size_;
+            delete[] items_;
+            items_ = new int[size_];
+
+            std::copy(source.begin(), source.end(), items_);
+        }
+
+        return *this;
     }
 
     ~Array()
@@ -87,8 +112,18 @@ public:
         return items_[index];
     }
 
+    bool operator==(const Array& rhs) const
+    {
+        return size_ == rhs.size_ && std::equal(begin(), end(), rhs.begin());
+    }
+
+    bool operator!=(const Array& rhs) const
+    {
+        return !(*this == rhs);
+    }
+
 private:
-    const size_t size_;
+    size_t size_;
     int* items_;
 };
 
@@ -107,10 +142,10 @@ TEST_CASE("init variables")
 void print(const Array& arr)
 {
     std::cout << "{ ";
-    for(auto it = arr.begin(); it != arr.end(); ++it)
+    for (auto it = arr.begin(); it != arr.end(); ++it)
     {
         std::cout << *it << " ";
-    }        
+    }
 
     std::cout << "}\n";
 }
@@ -163,7 +198,7 @@ TEST_CASE("containers & iterators")
 
     SECTION("container")
     {
-        std::list<int> vec = {1, 2, 3, 4, 5};        
+        std::list<int> vec = {1, 2, 3, 4, 5};
 
         for (auto it = vec.begin(); it != vec.end(); ++it)
         {
@@ -178,7 +213,7 @@ TEST_CASE("containers & iterators")
             const int size = 8;
             int native_arr[size] = {};
 
-            for(auto& item : native_arr)
+            for (auto& item : native_arr)
             {
                 item = 42;
             }
@@ -186,7 +221,7 @@ TEST_CASE("containers & iterators")
 
         SECTION("container")
         {
-            std::list<int> vec = {1, 2, 3, 4, 5};        
+            std::list<int> vec = {1, 2, 3, 4, 5};
 
             for (const auto& item : vec)
             {
@@ -211,12 +246,12 @@ TEST_CASE("containers & iterators")
         {
             Array arr = {1, 2, 3, 4, 5, 6};
 
-            for(auto& item : arr)
+            for (auto& item : arr)
             {
                 item = 2 * item;
             }
 
-            for(const auto& item : arr)
+            for (const auto& item : arr)
             {
                 std::cout << item << " ";
             }
@@ -239,7 +274,7 @@ TEST_CASE("Array - basic interface")
 
     CHECK(data1.size() == 10);
 
-    for(int i = 0; i < data1.size(); ++i)
+    for (int i = 0; i < data1.size(); ++i)
     {
         data1[i] = i * i;
     }
@@ -247,4 +282,45 @@ TEST_CASE("Array - basic interface")
     CHECK(data1[3] == 4);
 
     std::fill_n(data1.begin(), 4, 1024);
+}
+
+struct Data
+{
+    int id;
+    std::string name;
+};
+
+TEST_CASE("copy")
+{
+    SECTION("Data")
+    {
+        Data d1{42, "data"};
+        Data d2 = d1; // copy
+        CHECK(&d1 != &d2);
+        CHECK(d1.id == d2.id);
+        CHECK(d1.name == d2.name);
+
+        Data d3{d1}; // copy
+    }
+
+    SECTION("Array")
+    {
+        Array data1 = {1, 2, 3, 4, 5, 6, 7, 8};
+        CHECK(data1.size() == 8);
+
+        Array data2 = data1; // copy constructor
+        CHECK(data2.size() == 8);
+        CHECK(data2[2] == 3);
+
+        Array data3(data1); // copy constructor
+        CHECK(data1 == data3);
+
+        Array data4 = {1, 2, 3};
+        CHECK(data1 != data4); // !(data1 == data4)
+
+        data4 = data1; // copy assignment
+        CHECK(data1 == data4);
+
+        data1 = data1;
+    }
 }
