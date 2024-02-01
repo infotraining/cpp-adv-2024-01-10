@@ -300,3 +300,41 @@ TEST_CASE("rule of zero")
         p2 = std::move(p3); // mv        
     }
 }
+
+struct Human
+{
+    int id = 0;
+    std::string name;
+
+    Human() = default;
+
+    Human(int id, std::string name) : id{id}, name{std::move(name)}
+    {}
+
+    Human(const Human&) = default;
+    Human& operator=(const Human&) = default;
+
+    Human(Human&&) = default;
+    Human& operator=(Human&&) = default;
+
+    ~Human() { std::cout << "Log: ~Human(" << id  << ")\n"; }
+
+    void print() const
+    {
+        std::cout << "Person(" << id << ", '" << name << "')\n";
+    }
+};
+
+TEST_CASE("default special functions")
+{
+    Human p_def{42, "Jan"};
+    p_def.print();
+
+    Human p_twin = p_def;
+    p_twin.print();
+
+    Human p_target = std::move(p_twin); // static_cast<Human&&>(p_twin)
+    p_target.print();
+
+    CHECK(p_twin.name == "");
+}
