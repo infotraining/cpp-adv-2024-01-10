@@ -8,12 +8,12 @@
 namespace Explain
 {
     template <typename T>
-    class unique_ptr
+    class UniquePtr
     {
-        // TODO
     };
 } // namespace Explain
 
 TEST_CASE("move semantics - unique_ptr")
 {
+    using namespace Explain;    
 }
