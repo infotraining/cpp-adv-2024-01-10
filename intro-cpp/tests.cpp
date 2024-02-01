@@ -338,3 +338,12 @@ TEST_CASE("default special functions")
 
     CHECK(p_twin.name == "");
 }
+
+TEST_CASE("templated Array")
+{
+    Templates::Array<int> data_ints = {1, 2, 3, 4, 5};
+    CHECK(data_ints[2] == 3);
+
+    Templates::Array<std::string> data_strings = { "one", "two", "three" };
+    CHECK(data_strings[1] == "two");
+}
