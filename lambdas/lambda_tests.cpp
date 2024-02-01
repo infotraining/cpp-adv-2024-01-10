@@ -2,12 +2,16 @@
 
 #include <algorithm>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/benchmark/catch_benchmark.hpp>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 #include <functional>
 #include <queue>
+#include <format>
+#include <random>
+#include <execution>
 
 using Utils::Gadget;
 
@@ -327,13 +331,25 @@ public:
             Task task = q_tasks_.front();
             q_tasks_.pop();
 
-            task(); 
+            try
+            {
+                task(); 
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }                    
         }
     }
 };
 
 struct Printer
 {
+    int id;
+
+    Printer(int id) : id{id}
+    {}
+
     void on()
     {
         std::cout << "Printer is on\n";
@@ -342,6 +358,11 @@ struct Printer
     void off()
     {
         std::cout << "Printer is off\n";
+    }
+
+    void register_task(TaskQueue& q_tasks)
+    {
+        q_tasks.submit([this] { std::cout << std::format("Task from printer {:<8}\n", id); });
     }
 };
 
@@ -352,15 +373,39 @@ void print(const std::string& msg)
 
 TEST_CASE("TaskQueue")
 {
-    Printer prn;
     TaskQueue tq;
+    Printer prn{665};
+    prn.register_task(tq);
 
     tq.submit([]{ std::cout << "Start\n";});
     tq.submit([] { print("Message"); });
     tq.submit([&prn](){ prn.on(); });
-    tq.submit([&prn](){ prn.off(); });
+    tq.submit([&prn](){ prn.off(); throw std::runtime_error("Stack overflow"); });
     tq.submit([]{ std::cout << "Stop\n";});
 
     //----------------
     tq.run();
+}
+
+TEST_CASE("algorithms")
+{
+    std::vector<int> vec(1'000'000);
+
+    std::random_device rnd_seed;
+    std::mt19937_64 rnd_gen(rnd_seed());
+    std::uniform_int_distribution rnd_distr(0, 1'000'000);
+
+    std::generate(vec.begin(), vec.end(), [&] { return rnd_distr(rnd_gen); });
+
+    BENCHMARK("seq") 
+    {
+        std::sort(vec.begin(), vec.end());
+        return std::is_sorted(vec.begin(), vec.end());
+    };
+
+    BENCHMARK("par") 
+    {
+        std::sort(std::execution::par, vec.begin(), vec.end());
+        return std::is_sorted(std::execution::par, vec.begin(), vec.end());
+    };
 }
