@@ -12,6 +12,11 @@
 #include <format>
 #include <random>
 #include <execution>
+#include <future>
+#include <thread>
+#include <random>
+
+using namespace std::literals;
 
 using Utils::Gadget;
 
@@ -408,4 +413,51 @@ TEST_CASE("algorithms")
         std::sort(std::execution::par, vec.begin(), vec.end());
         return std::is_sorted(std::execution::par, vec.begin(), vec.end());
     };
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// async functions
+
+int calculate(int x)
+{
+    std::cout << "Start of calc for " << x << std::endl;
+    std::random_device rnd;
+    std::uniform_int_distribution rnd_dist(3000, 7200);
+    size_t time_interval = rnd_dist(rnd);
+    std::this_thread::sleep_for(std::chrono::milliseconds(time_interval));
+    int result = x * x;
+    std::cout << "End of calc for " << x << std::endl;
+    return result;
+}
+
+constexpr int calculate_size(int x)
+{
+    int result = x * x;
+    return result;
+}
+
+
+TEST_CASE("sync vs. async")
+{
+    // SECTION("sync")
+    // {
+    //     auto res1 = calculate(12);
+    //     auto res2 = calculate(16);
+    //     auto res3 = calculate(42);
+    //     auto res4 = calculate(665);
+
+    //     std::cout << res1 << " " << res2 << " " << res3 << " " << res4 << "\n";
+    // }
+
+    SECTION("async")
+    {
+        std::future<int> f1 = std::async(std::launch::async, calculate, 12);       
+        std::future<int> f2 = std::async(std::launch::deferred, calculate, 16);       
+        std::future<int> f3 = std::async(std::launch::async, calculate, 42);       
+        std::future<int> f4 = std::async(std::launch::async, [] { return calculate(665); });  
+
+        std::this_thread::sleep_for(10s);    
+
+        std::cout << f1.get() << " " << f2.get() << " " << f3.get() << " " << f4.get() << "\n";
+    }
 }
