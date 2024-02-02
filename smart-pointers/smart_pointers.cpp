@@ -3,6 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 #include <vector>
+#include <map>
 
 using Utils::Gadget;
 
@@ -166,4 +167,31 @@ TEST_CASE("vector gadget")
         if (g)
             use_gadget(g.get());
     }
+}
+
+
+TEST_CASE("shared_ptrs")
+{
+    using namespace std;
+
+    map<string, shared_ptr<Gadget>> gadgets;
+    weak_ptr<Gadget> weak_g;
+
+    {
+        std::shared_ptr<Gadget> g1 = std::make_shared<Gadget>(42, "ipad");
+        std::shared_ptr<Gadget> g2 = g1;
+        weak_g = g1;
+        CHECK(g1.use_count() == 2);        
+
+        gadgets.emplace("ipad", g1);
+        CHECK(g1.use_count() == 3);
+    }
+
+    CHECK(gadgets["ipad"]->id() == 42);
+
+    gadgets.clear(); // now ipad is deleted
+
+    std::shared_ptr<Gadget> g3 = weak_g.lock();
+    if (g3) // if g3 is alive
+        std::cout << g3->name() << " is alive\n";
 }
