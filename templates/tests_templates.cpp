@@ -13,6 +13,7 @@ using namespace std::literals;
 template <typename T>
 T max_value(T a, T b)
 {
+    static_assert(!std::is_pointer_v<T>, "T cannot be a pointer type");
     return a < b ? b : a;
 }
 
@@ -30,14 +31,14 @@ TEST_CASE("function templates")
     CHECK(max_value<std::string>("text"s, "Text") == "text"s);
 }
 
-template<typename T1, typename T2>
+template<typename T1 = int, typename T2 = int>
 struct ValuePair
 {
     T1 first;
     T2 second;
 
-    ValuePair(T1 f, T2 s) : first{f}, second{s}
-    {}
+    ValuePair(T1 f = T1{}, T2 s = T2{}) : first{f}, second{s}
+    {}    
 
     void print() const
     {
@@ -53,10 +54,14 @@ TEST_CASE("class templates")
     ValuePair<int, std::string> v2{67, "sixty-seven"};
     v2.print();
 
+    ValuePair<> v3(42, 556);
+
     SECTION("since C++17")
     {
-        ValuePair vp{42.1, "text"};
-        vp.print();
+        ValuePair vp1{42.1, "text"};
+        vp1.print();
+
+        ValuePair vp2;
     }
 }
 

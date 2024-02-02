@@ -53,19 +53,117 @@ TEST_CASE("legacy hell with dynamic memory")
 
     {
         Gadget* g = new Gadget(13, "ipad");
-        
 
         use(g);
         // use_gadget(g);  // UB!!! - use after delete
-        // std::cout << g->name() << std::endl; // UB!!! - use after delete
+        //  std::cout << g->name() << std::endl; // UB!!! - use after delete
     }
 
     {
         Gadget* g = get_gadget("ipad");
-        
 
         use(g);
 
         // delete g; // UB!!! - second delete
+    }
+}
+
+namespace ModernCpp
+{
+    // forward declarations
+    std::unique_ptr<Gadget> get_gadget(const std::string& name);
+    void use(std::unique_ptr<Gadget> g);
+    void use_gadget(Gadget* g);
+
+    // definitions
+    std::unique_ptr<Gadget> get_gadget(const std::string& name)
+    {
+        static int id = 665;
+        return std::unique_ptr<Gadget>(new Gadget(++id, name));
+    }
+
+    void use(std::unique_ptr<Gadget> g)
+    {
+        if (g)
+            std::cout << "Using " << g->name() << "\n";
+    }
+
+    void use_gadget(Gadget* g)
+    {
+        if (g)
+            std::cout << "Using " << g->name() << "\n";
+    }
+} // namespace LegacyCode
+
+TEST_CASE("memory management - modern C++")
+{
+    using namespace ModernCpp;
+
+    SECTION("one")
+    {
+        std::unique_ptr<Gadget> g = get_gadget("ipad");
+
+        use_gadget(g.get());
+    }
+
+    SECTION("two")
+    {
+        use_gadget(get_gadget("ipad").get());
+    }
+
+    SECTION("three")
+    {
+        std::unique_ptr<Gadget> g(new Gadget(13, "ipad"));
+
+        use(std::move(g));
+
+        g = get_gadget("smartwatch");        
+
+        use_gadget(g.get());
+    }
+
+    SECTION("four")
+    {
+        std::unique_ptr<Gadget> g = get_gadget("ipad");
+
+        use(std::move(g));
+
+        use(get_gadget("phone"));        
+    }
+}
+
+TEST_CASE("vector gadget")
+{
+    using namespace ModernCpp;
+
+    std::vector<std::unique_ptr<Gadget>> gadgets;
+
+    gadgets.push_back(get_gadget("ipad1"));
+    gadgets.push_back(get_gadget("ipad2"));
+    gadgets.push_back(get_gadget("ipad3"));
+
+    std::unique_ptr<Gadget> ptr_g = get_gadget("ipad4");
+    gadgets.push_back(std::move(ptr_g));
+
+    for(const auto& g : gadgets)
+    {
+        if (g)
+            use_gadget(g.get());
+    }
+
+    std::cout << "--------- before move to use-\n";
+
+    use(std::move(gadgets[2]));
+
+    std::cout << "--------- after move to use\n";
+
+    gadgets.erase(gadgets.begin());
+
+    std::cout << "---------\n";
+
+    for(const auto& g : gadgets)
+    {
+        if (g)
+            use_gadget(g.get());
     }
 }

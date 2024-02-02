@@ -9,24 +9,8 @@ public:
     using iterator = int*;             // typedef int* iterator;
     using const_iterator = const int*; // typedef const Pint* iterator;
 
-    Array(size_t size)
-        : size_{size}
-        , items_{new int[size]}
-    {
-        // for(size_t i = 0; i < size_; ++i)
-        //     items_[i] = 0; // *(items_ + i) = 0
-
-        std::fill_n(items_, size_, 0);
-    }
-
-    Array(std::initializer_list<int> il)
-        : size_{il.size()}
-        , items_{new int[size_]}
-    {
-        std::copy(il.begin(), il.end(), items_);
-
-        print();
-    }
+    explicit Array(size_t size);
+    Array(std::initializer_list<int> il);        
 
     // copy constructor
     Array(const Array& source)
@@ -189,25 +173,23 @@ private:
 
 namespace Templates
 {
+    template <typename T>
     class Array
     {
     public:
-        using iterator = int*;             // typedef int* iterator;
-        using const_iterator = const int*; // typedef const Pint* iterator;
+        using iterator = T*;             // typedef int* iterator;
+        using const_iterator = const T*; // typedef const Pint* iterator;
 
-        Array(size_t size)
+        explicit Array(size_t size)
             : size_{size}
-            , items_{new int[size]}
+            , items_{new T[size]}
         {
-            // for(size_t i = 0; i < size_; ++i)
-            //     items_[i] = 0; // *(items_ + i) = 0
-
-            std::fill_n(items_, size_, 0);
+            std::fill_n(items_, size_, T{});
         }
 
-        Array(std::initializer_list<int> il)
+        Array(std::initializer_list<T> il)
             : size_{il.size()}
-            , items_{new int[size_]}
+            , items_{new T[size_]}
         {
             std::copy(il.begin(), il.end(), items_);
 
@@ -215,9 +197,10 @@ namespace Templates
         }
 
         // copy constructor
-        Array(const Array& source)
+        template <typename U>
+        Array(const Array<U>& source)
             : size_{source.size()}
-            , items_{new int[source.size()]}
+            , items_{new T[source.size()]}
         {
             std::copy(source.begin(), source.end(), items_);
 
@@ -266,17 +249,6 @@ namespace Templates
         // move assignment
         Array& operator=(Array&& source)
         {
-            // if (this != &source)
-            // {
-            //     delete[] items_;
-
-            //     size_ = source.size_;
-            //     items_ = source.items_;
-
-            //     source.size_ = 0; // extra safety
-            //     source.items_ = nullptr;
-            // }
-
             Array temp = std::move(source);
             swap(temp);
 
@@ -322,17 +294,17 @@ namespace Templates
             return items_ + size_;
         }
 
-        const int& operator[](size_t index) const // read-only
+        const T& operator[](size_t index) const // read-only
         {
             return items_[index];
         }
 
-        int& operator[](size_t index) // read-write
+        T& operator[](size_t index) // read-write
         {
             return items_[index];
         }
 
-        const int& at(size_t index) const // read-only
+        const T& at(size_t index) const // read-only
         {
             if (index >= size_)
                 throw std::out_of_range("Index out of bounds");
@@ -340,7 +312,7 @@ namespace Templates
             return items_[index];
         }
 
-        int& at(size_t index) // read-write
+        T& at(size_t index) // read-write
         {
             if (index >= size_)
                 throw std::out_of_range("Index out of bounds");
@@ -360,18 +332,21 @@ namespace Templates
 
     private:
         size_t size_;
-        int* items_;
+        T* items_;
 
-        void print() const
-        {
-            std::cout << "Array{ ";
-            for (const auto& item : *this)
-            {
-                std::cout << item << " ";
-            }
-            std::cout << "}\n";
-        }
+        void print() const;
     };
+
+    template <typename T>
+    void Array<T>::print() const
+    {
+        std::cout << "Array{ ";
+        for (const auto& item : *this)
+        {
+            std::cout << item << " ";
+        }
+        std::cout << "}\n";
+    }
 
 } // namespace Templates
 

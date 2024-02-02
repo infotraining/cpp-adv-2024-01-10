@@ -346,4 +346,48 @@ TEST_CASE("templated Array")
 
     Templates::Array<std::string> data_strings = { "one", "two", "three" };
     CHECK(data_strings[1] == "two");
+
+    Templates::Array<std::string> words(10);
+    CHECK(words[0] == "");    
+
+    Templates::Array<const char*> c_strings = {"one", "two", "three"};
+    Templates::Array<std::string> new_words = c_strings;
+
+    CHECK(new_words == Templates::Array<std::string>{"one", "two", "three"});
+
+    new_words = Templates::Array<const char*>{ "new", "words"};
+}
+
+///////////////////////////////
+
+struct B
+{
+    int value;
+    char c;
+};
+
+struct A
+{
+    int value;
+
+    A(int a) : value{a}
+    {}
+
+    A(const B& b) :value {b.value}
+    {}
+
+    operator B()
+    {
+        return B{value};
+    }
+};
+
+TEST_CASE("assignment")
+{
+    A a{42};
+    B b{665, 'c'};
+
+    A a2 = b;
+
+    B b2 = a2;
 }
